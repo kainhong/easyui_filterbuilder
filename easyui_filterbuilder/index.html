@@ -16,6 +16,9 @@
     <div id="dy" class="expression-groups">
         
     </div> 
+    <div>
+        <button onclick="getData();">Get</button>
+    </div>
     <script> 
         var fields = [{
             "name":"productName",
@@ -50,6 +53,12 @@
                 groups:groups
             })
         });
+
+
+        function getData() {
+            var groups = $("#dy").expression('getData');
+            console.log(groups);
+        }
     </script>
 </body>
 </html>

@@ -29,7 +29,7 @@
                             .attr('id', 'menu_' + index)
                             .html(menuContent).appendTo(panel);
 
-        var nodesPanel = $('<div></div>').appendTo(panel);
+        var nodesPanel = $('<div class="expression-nodes"></div>').appendTo(panel);
 
         menubutton.menubutton({ menu: '#menu_' + index });
         menu.menu({
@@ -53,7 +53,7 @@
             }
             else {
                 self.menubutton.menubutton({ 'text': item.text });
-                this.type = item.text;
+                options.type = item.text;
             }
         };
 
@@ -65,10 +65,29 @@
         $.each(options.nodes, function (i, node) {
             addNode(node);
         });
-    };     
+    };
 
-    $.fn.expressionGroup = function (options, param) {
+    function getData(target) {
+        var options = $.data(target, 'expressiongroup').options;
+        var group = {};
+        group.type = options.type;
+        var els = $(target).children('.expression-nodes').children('.expression-node');
+        group.nodes = [];
+        $.each(els, function (i, e) {
+            var node = $(e).expressionnode('getData');
+            group.nodes.push(node);
+        });
+        
+        return group;
+    };
+
+    $.fn.expressiongroup = function (options, param) {
+        if (typeof options == 'string') {
+            return $.fn.expressiongroup.methods[options](this, param);
+        };
+
         options = options || {};
+
         return this.each(function () {
             if (!$.data(this, 'expressiongroup')) {
                 $.data(this, 'expressiongroup', {
@@ -79,13 +98,16 @@
         });
     };
 
-    $.fn.expressionGroup.methods = {
+    $.fn.expressiongroup.methods = {
         options: function (jq) {
             return $.data(jq[0], 'expressionGroup').options;
+        },
+        getData: function (jq) {
+            return getData(jq[0]);
         }
     };
 
-    $.fn.expressionGroup.defaults = {};
+    $.fn.expressiongroup.defaults = {};
 });
 
 $(function ($) {
@@ -96,12 +118,27 @@ $(function ($) {
         var fields = options.fields;
         $.each(groups, function (i, group) {
             var op = $.extend({ fields: fields }, group);
-            $("<div></div>").appendTo($(target)).expressionGroup(op);
+            $("<div></div>").appendTo($(target)).expressiongroup(op);
         });
+    };
+    function getData(target) {
+        var groups = [];
+        var els = $(target).children('.expression-group');
+        $.each(els, function (i, el) {
+            var group = $(el).expressiongroup('getData');
+            groups.push(group);
+        });
+        return groups;
     };
 
     $.fn.expression = function (options, param) {
+       
+        if (typeof options == 'string') {
+            return $.fn.expression.methods[options](this, param);
+        };
+
         options = options || {};
+
         return this.each(function () {
             if (!$.data(this, 'expression')) {
                 $.data(this, 'expression', {
@@ -115,6 +152,9 @@ $(function ($) {
     $.fn.expression.methods = {
         options: function (jq) {
             return $.data(jq[0], 'expression').options;
+        },
+        getData: function (jq) {
+            return getData(jq[0]);
         }
     };
 

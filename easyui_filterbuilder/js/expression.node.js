@@ -48,9 +48,11 @@
         var opMenu = $("<div></div>").attr('id', "field_menu2_" + index).appendTo(target);
 
         if( options.node == null)
-            options.node = { field: fields[0] };
+            options.node = { field: fields[0],value:null };
         options.node.op = nodeOptions[0];
-        createEditor(options.node, editorDiv);
+        var editor = createEditor(options, editorDiv);
+        options.editor = editor;
+        options.ed.setValue(editor, options.node.value);
 
         fieldMenu.buildmenu({
             data: fields,
@@ -85,19 +87,20 @@
         return target;
     };
 
-    function createEditor(node, target) {
-        var editor = getEditor();
-        editor.init(target, null);
+    function createEditor(options, target) {
+        var editor = getEditor(options.field);
+        options.ed = editor;
+        return editor.init(target, null);
     };
 
-    function getEditor(dataType) {
+    function getEditor(field) {
         var editors = $.fn.datagrid.defaults.editors;
         return editors.text;
     };
 
-    $.fn.expressionnode = function (options, params) {
+    $.fn.expressionnode = function (options, param) {
         if (typeof options == 'string') {
-            return $.fn.linkbutton.methods[options](this, param);
+            return $.fn.expressionnode.methods[options](this, param);
         };
         options = options || {};
         return this.each(function () {
@@ -110,6 +113,13 @@
         });
     };
 
+    function getData(target) {
+        var op = $.data(target, 'expressionnode').options;
+        var node = $.extend({}, op.node);
+        node.value = op.ed.getValue(op.editor);
+        return node;
+    };
+
     $.fn.expressionnode.defaults = {
         data: []
     };
@@ -117,6 +127,9 @@
     $.fn.expressionnode.methods = {
         options: function (jq) {
             return $.data(jq[0], 'expressionnode').options;
+        },
+        getData: function (jq) {
+            return getData(jq[0]);
         }
     };
 
