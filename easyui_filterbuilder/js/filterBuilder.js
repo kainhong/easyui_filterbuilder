@@ -33,33 +33,39 @@
 
         menubutton.menubutton({ menu: '#menu_' + index });
         menu.menu({
-            onClick: menuClick
-        });
-
-        var menuClick = function (item) {
-            var name = item.name;
-            if (name == "remove") {
-                var groups = panel.parent().children('.expression-group');
-                if (groups.length == 1) {
-                    nodesPanel.empty();
+            onClick:  function (item) {
+                var name = item.name;
+                if (name == "remove") {
+                    var groups = panel.parent().children('.expression-group');
+                    if (groups.length == 1) {
+                        nodesPanel.empty();
+                    }
+                    else {
+                        panel.remove();
+                    }
+                }
+                else if (name == "group") {
+                    var div = $("<div></div>").appendTo(panel.parent());
+                    div.expressiongroup({ type:'And', fields: options.fields });
                 }
                 else {
-                    panel.remove();
+                    self.menubutton.menubutton({ 'text': item.text });
+                    options.type = item.text;
                 }
             }
-            else if (name == "group") {
-                var div = $("<div></div>").appendTo(panel.parent());
-                div.expressionGroup({ fields: options.fields });
-            }
-            else {
-                self.menubutton.menubutton({ 'text': item.text });
-                options.type = item.text;
-            }
-        };
-
+        });
+        
         var addNode = function (node) {
             var div = $("<div></div>").appendTo(nodesPanel);
             div.expressionnode({ fields: options.fields, node: node });
+        };
+        options.nodes = options.nodes || [];
+        if (options.nodes.length == 0) {
+            options.nodes.push({
+                field: options.fields[0],
+                op: 'equals',
+                value: null
+            })
         };
 
         $.each(options.nodes, function (i, node) {

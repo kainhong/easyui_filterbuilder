@@ -22,28 +22,31 @@
     <script> 
         var fields = [{
             "name":"productName",
-            "text": "Product Name", 
+            "text": "Product Name",
+            type:"string"
         },{
             "name": "createDate",
-            "text": "Create Date",  
+            "text": "Create Date",
+            type:"date"
         },
         {
             "name": "price",
             "text": "Price",
+            type:"decimal"
         }];
         var groups = [
             {
                 type: 'And',
                 id: '1',
                 nodes: [
-                    { field: { name: "productName", text: "Product Name" }, op: "equals", value: '' }
+                    { name:'productName', op: "equals", value: '' }
                 ]
             },
             {
                 type: 'And',
                 id: '1',
                 nodes: [
-                    { field: { name: "price", text: "Price" }, op: "lessthan", value: 100 }
+                    { name: 'price', op: "lessthan", value: 100 }
                 ]
             },
         ]

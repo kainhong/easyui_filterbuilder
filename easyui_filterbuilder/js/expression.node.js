@@ -1,24 +1,31 @@
 ﻿$(function () {
     var index = 0;
-    var nodeOptions = [{text:'等于',name:'equals'},
-                                {text:'不等',name:'notequals'},
-                                {text:'大于',name:'greatthan'},
+    var typeEditors = {
+        'string': $.fn.datagrid.defaults.editors.text,
+        'datetime': $.fn.datagrid.defaults.editors.datetimebox,
+        'date': $.fn.datagrid.defaults.editors.datebox,
+        'int': $.fn.datagrid.defaults.editors.numberbox,
+        'boolean': $.fn.datagrid.defaults.editors.checkbox,
+        'decimal': $.fn.datagrid.defaults.editors.numberbox
+    };
+    var nodeOptions = [{ text: '等于', name: 'equals' },
+                                { text: '不等', name: 'notequals' },
+                                { text: '大于', name: 'greatthan' },
                                 { text: '大于等于', name: 'greatthanequals' },
-                                {text:'小于',name:'lessthan'},
-                                {text:'小于等于',name:'lessthanequals'},
-                                {text:'在...之间',name:'between'},
+                                { text: '小于', name: 'lessthan' },
+                                { text: '小于等于', name: 'lessthanequals' },
+                                { text: '在...之间', name: 'between' },
                                 { text: '不在...之间', name: 'notbetween' },
-                                {text:'包含',name:'contains'},
-                                {text:'不包含',name:'notcontains'},
-                                {text:'以...开始',name:'startWith'},
-                                {text:'以...结尾',name:'endWith'},
-                                {text:'相似',name:'like'},
-                                {text:'不相似',name:'notlike'},
-                                {text:'为空',name:'empty'},
-                                {text:'不为空',name:'notempty'}];
+                                { text: '包含', name: 'contains' },
+                                { text: '不包含', name: 'notcontains' },
+                                { text: '以...开始', name: 'startWith' },
+                                { text: '以...结尾', name: 'endWith' },
+                                { text: '相似', name: 'like' },
+                                { text: '不相似', name: 'notlike' },
+                                { text: '为空', name: 'empty' },
+                                { text: '不为空', name: 'notempty' }];
 
-    function findField(fields,name)
-    {
+    function findField(fields, name) {
         var result = null;
         $.each(fields, function (i, row) {
             if (row.name == name)
@@ -47,8 +54,10 @@
         var fieldMenu = $("<div></div>").attr('id', "field_menu_" + index).appendTo(target);
         var opMenu = $("<div></div>").attr('id', "field_menu2_" + index).appendTo(target);
 
-        if( options.node == null)
-            options.node = { field: fields[0],value:null };
+        if (options.node == null)
+            options.node = { field: fields[0], value: null };
+        else
+            options.node.field = findField(fields, options.node.name);
         options.node.op = nodeOptions[0];
         var editor = createEditor(options, editorDiv);
         options.editor = editor;
@@ -57,8 +66,17 @@
         fieldMenu.buildmenu({
             data: fields,
             onClick: function (item) {
-                options.node = { field: findField(options.fields, item.id) };
-                options.node.op = nodeOptions[0];
+                var field = findField(options.fields, item.id);
+                if (field.type != options.node.field.type) {
+                    options.node = { field: field };
+                    options.node.op = nodeOptions[0];
+                    createEditor(options, editorDiv);
+                }
+                else {
+                    options.node = { field: field };
+                    options.node.op = nodeOptions[0];
+                }
+
                 fieldMenuButton.menubutton({
                     text: options.node.field.text,
                 });
@@ -76,7 +94,7 @@
 
         optionMenuButton.menubutton({
             text: options.node.op.text,
-            menu: "#field_menu2_"  + index
+            menu: "#field_menu2_" + index
         });
 
         fieldMenuButton.menubutton({
@@ -88,14 +106,15 @@
     };
 
     function createEditor(options, target) {
-        var editor = getEditor(options.field);
+        target.empty();
+        var editor = getEditor(options.node.field);
         options.ed = editor;
         return editor.init(target, null);
     };
 
     function getEditor(field) {
-        var editors = $.fn.datagrid.defaults.editors;
-        return editors.text;
+        var editors = typeEditors[field.type];// $.fn.datagrid.defaults.editors;
+        return editors;
     };
 
     $.fn.expressionnode = function (options, param) {
@@ -115,7 +134,7 @@
 
     function getData(target) {
         var op = $.data(target, 'expressionnode').options;
-        var node = $.extend({}, op.node);
+        var node = { name: op.node.field.name, op: op.node.op.name };
         node.value = op.ed.getValue(op.editor);
         return node;
     };
